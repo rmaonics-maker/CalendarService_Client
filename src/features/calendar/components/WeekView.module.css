@@ -1,0 +1,90 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 600px; /* Фиксированная высота вьюпорта */
+    border: 1px solid #444;
+    background-color: #1e1e1e;
+    overflow-y: auto; /* Скролл по вертикали */
+    position: relative;
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 50px repeat(7, 1fr); /* 50px под время, остальное дням */
+    border-bottom: 1px solid #444;
+    position: sticky; /* Липкий хедер */
+    top: 0;
+    background-color: #1e1e1e;
+    z-index: 10;
+}
+
+.headerCell {
+    padding: 10px;
+    text-align: center;
+    border-right: 1px solid #333;
+    font-weight: bold;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.body {
+    display: grid;
+    /* 50px колонка времени + 7 дней */
+    grid-template-columns: 50px repeat(7, 1fr);
+    /* 24 часа * 4 слота = 96 строк. minmax(10px) задает высоту 15-минутного слота */
+    grid-template-rows: repeat(96, 15px);
+    position: relative;
+}
+
+/* Линии сетки */
+.timeLabel {
+    border-right: 1px solid #444;
+    color: #666;
+    font-size: 0.7rem;
+    text-align: right;
+    padding-right: 5px;
+    /* Центрируем лейбл по вертикали относительно часа */
+    display: flex;
+    align-items: start;
+    justify-content: flex-end;
+}
+
+/* Вертикальные линии дней */
+.dayColumn {
+    border-right: 1px solid #333;
+    grid-row: 1 / -1; /* На всю высоту */
+    pointer-events: none; /* Чтобы клики проходили сквозь линии */
+}
+
+/* Горизонтальные линии часов */
+.hourLine {
+    grid-column: 2 / -1; /* От 2 колонки до конца */
+    border-top: 1px solid #333;
+    pointer-events: none; /* Чтобы клики проходили сквозь линии */
+}
+
+/* Префаб События */
+.eventBlock {
+    background-color: rgba(97, 218, 251, 0.8); /* React Blue с прозрачностью */
+    border-left: 3px solid #21a1c4;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 0.75rem;
+    color: #000;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 5; /* Поверх линий сетки */
+    /* Анимация появления */
+    transition: transform 0.1s;
+
+    /* Flex для контента внутри события */
+    display: flex;
+    flex-direction: column;
+}
+
+    .eventBlock:hover {
+        transform: scale(1.02);
+        z-index: 10;
+        background-color: rgba(97, 218, 251, 1);
+    }
