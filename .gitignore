@@ -37,3 +37,4 @@ coverage
 # Vite specific
 public/hot
 _site
+.vs/
