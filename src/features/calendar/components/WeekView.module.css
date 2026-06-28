@@ -1,18 +1,18 @@
 .container {
     display: flex;
     flex-direction: column;
-    height: 600px; /* Фиксированная высота вьюпорта */
+    height: 600px; /* Р¤РёРєСЃРёСЂРѕРІР°РЅРЅР°СЏ РІС‹СЃРѕС‚Р° РІСЊСЋРїРѕСЂС‚Р° */
     border: 1px solid #444;
     background-color: #1e1e1e;
-    overflow-y: auto; /* Скролл по вертикали */
+    overflow-y: auto; /* РЎРєСЂРѕР»Р» РїРѕ РІРµСЂС‚РёРєР°Р»Рё */
     position: relative;
 }
 
 .header {
     display: grid;
-    grid-template-columns: 50px repeat(7, 1fr); /* 50px под время, остальное дням */
+    grid-template-columns: 50px repeat(7, 1fr); /* 50px РїРѕРґ РІСЂРµРјСЏ, РѕСЃС‚Р°Р»СЊРЅРѕРµ РґРЅСЏРј */
     border-bottom: 1px solid #444;
-    position: sticky; /* Липкий хедер */
+    position: sticky; /* Р›РёРїРєРёР№ С…РµРґРµСЂ */
     top: 0;
     background-color: #1e1e1e;
     z-index: 10;
@@ -29,43 +29,43 @@
 
 .body {
     display: grid;
-    /* 50px колонка времени + 7 дней */
+    /* 50px РєРѕР»РѕРЅРєР° РІСЂРµРјРµРЅРё + 7 РґРЅРµР№ */
     grid-template-columns: 50px repeat(7, 1fr);
-    /* 24 часа * 4 слота = 96 строк. minmax(10px) задает высоту 15-минутного слота */
+    /* 24 С‡Р°СЃР° * 4 СЃР»РѕС‚Р° = 96 СЃС‚СЂРѕРє. minmax(10px) Р·Р°РґР°РµС‚ РІС‹СЃРѕС‚Сѓ 15-РјРёРЅСѓС‚РЅРѕРіРѕ СЃР»РѕС‚Р° */
     grid-template-rows: repeat(96, 15px);
     position: relative;
 }
 
-/* Линии сетки */
+/* Р›РёРЅРёРё СЃРµС‚РєРё */
 .timeLabel {
     border-right: 1px solid #444;
     color: #666;
     font-size: 0.7rem;
     text-align: right;
     padding-right: 5px;
-    /* Центрируем лейбл по вертикали относительно часа */
+    /* Р¦РµРЅС‚СЂРёСЂСѓРµРј Р»РµР№Р±Р» РїРѕ РІРµСЂС‚РёРєР°Р»Рё РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ С‡Р°СЃР° */
     display: flex;
     align-items: start;
     justify-content: flex-end;
 }
 
-/* Вертикальные линии дней */
+/* Р’РµСЂС‚РёРєР°Р»СЊРЅС‹Рµ Р»РёРЅРёРё РґРЅРµР№ */
 .dayColumn {
     border-right: 1px solid #333;
-    grid-row: 1 / -1; /* На всю высоту */
-    pointer-events: none; /* Чтобы клики проходили сквозь линии */
+    grid-row: 1 / -1; /* РќР° РІСЃСЋ РІС‹СЃРѕС‚Сѓ */
+    pointer-events: none; /* Р§С‚РѕР±С‹ РєР»РёРєРё РїСЂРѕС…РѕРґРёР»Рё СЃРєРІРѕР·СЊ Р»РёРЅРёРё */
 }
 
-/* Горизонтальные линии часов */
+/* Р“РѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Рµ Р»РёРЅРёРё С‡Р°СЃРѕРІ */
 .hourLine {
-    grid-column: 2 / -1; /* От 2 колонки до конца */
+    grid-column: 2 / -1; /* РћС‚ 2 РєРѕР»РѕРЅРєРё РґРѕ РєРѕРЅС†Р° */
     border-top: 1px solid #333;
-    pointer-events: none; /* Чтобы клики проходили сквозь линии */
+    pointer-events: none; /* Р§С‚РѕР±С‹ РєР»РёРєРё РїСЂРѕС…РѕРґРёР»Рё СЃРєРІРѕР·СЊ Р»РёРЅРёРё */
 }
 
-/* Префаб События */
+/* РџСЂРµС„Р°Р± РЎРѕР±С‹С‚РёСЏ */
 .eventBlock {
-    background-color: rgba(97, 218, 251, 0.8); /* React Blue с прозрачностью */
+    background-color: rgba(97, 218, 251, 0.8); /* React Blue СЃ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊСЋ */
     border-left: 3px solid #21a1c4;
     border-radius: 4px;
     padding: 2px 5px;
@@ -74,11 +74,11 @@
     overflow: hidden;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    z-index: 5; /* Поверх линий сетки */
-    /* Анимация появления */
+    z-index: 5; /* РџРѕРІРµСЂС… Р»РёРЅРёР№ СЃРµС‚РєРё */
+    /* РђРЅРёРјР°С†РёСЏ РїРѕСЏРІР»РµРЅРёСЏ */
     transition: transform 0.1s;
 
-    /* Flex для контента внутри события */
+    /* Flex РґР»СЏ РєРѕРЅС‚РµРЅС‚Р° РІРЅСѓС‚СЂРё СЃРѕР±С‹С‚РёСЏ */
     display: flex;
     flex-direction: column;
 }

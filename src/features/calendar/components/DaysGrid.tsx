@@ -1,14 +1,15 @@
 import { DayCell } from './DayCell';
-import type { CalendarEvent } from '../../../types/calendar';
+import type { AppointmentResponse } from '../../../types/calendar';
 import styles from './DaysGrid.module.css';
 
 interface DaysGridProps {
     year: number;
     month: number;
-    events: CalendarEvent[];
+    events: AppointmentResponse[];
+    onSelect?: (event: AppointmentResponse) => void;
 }
 
-export const DaysGrid = ({ year, month, events }: DaysGridProps) => {
+export const DaysGrid = ({ year, month, events, onSelect }: DaysGridProps) => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDayOfMonth = new Date(year, month, 1).getDay();
 
@@ -19,10 +20,12 @@ export const DaysGrid = ({ year, month, events }: DaysGridProps) => {
 
     const getEventsForDay = (day: number) => {
         return events.filter(e => {
+            // startTime хранится в UTC (ISO с Z); сетка отображается в UTC-модели
+            // (см. dateUtils.getGridRow), поэтому день берём по UTC-компонентам.
             const eDate = new Date(e.startTime);
-            return eDate.getDate() === day &&
-                eDate.getMonth() === month &&
-                eDate.getFullYear() === year;
+            return eDate.getUTCDate() === day &&
+                eDate.getUTCMonth() === month &&
+                eDate.getUTCFullYear() === year;
         });
     };
 
@@ -68,6 +71,7 @@ export const DaysGrid = ({ year, month, events }: DaysGridProps) => {
                         events={getEventsForDay(day)}
                         isToday={isToday(day)}
                         isWeekend={isWeekend}
+                        onSelect={onSelect}
                     />
                 );
             })}

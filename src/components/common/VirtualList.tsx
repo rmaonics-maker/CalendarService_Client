@@ -1,4 +1,4 @@
-import { useState, useMemo, UIEvent, CSSProperties } from 'react';
+import { useState, useMemo, type UIEvent, type CSSProperties } from 'react';
 
 // Generic Props: T - тип данных (как <T> в C#)
 interface VirtualListProps<T> {

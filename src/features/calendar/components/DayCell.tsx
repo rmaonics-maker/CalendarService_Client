@@ -1,14 +1,15 @@
-import type { CalendarEvent } from '../../../types/calendar';
+import type { AppointmentResponse } from '../../../types/calendar';
 import styles from './DayCell.module.css';
 
 interface DayCellProps {
     day: number;
-    events: CalendarEvent[];
+    events: AppointmentResponse[];
     isToday?: boolean;   // Новый проп
     isWeekend?: boolean; // Новый проп
+    onSelect?: (event: AppointmentResponse) => void;
 }
 
-export const DayCell = ({ day, events, isToday, isWeekend }: DayCellProps) => {
+export const DayCell = ({ day, events, isToday, isWeekend, onSelect }: DayCellProps) => {
     // Вычисляем CSS классы динамически
     // Unity: string cssClass = "cell";
     // if (isWeekend) cssClass += " weekend";
@@ -21,7 +22,12 @@ export const DayCell = ({ day, events, isToday, isWeekend }: DayCellProps) => {
             <span className={styles.dateNumber}>{day}</span>
 
             {events.map(evt => (
-                <div key={evt.id} className={styles.eventItem}>
+                <div
+                    key={evt.id}
+                    className={styles.eventItem}
+                    style={{ cursor: onSelect ? 'pointer' : 'default' }}
+                    onClick={onSelect ? e => { e.stopPropagation(); onSelect(evt); } : undefined}
+                >
                     {evt.title}
                 </div>
             ))}

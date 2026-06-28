@@ -1,22 +1,23 @@
 import { useMemo } from 'react'; // Optimization Hook
-import type { CalendarEvent } from '../../../types/calendar';
+import type { AppointmentResponse } from '../../../types/calendar';
 import styles from './WeekView.module.css';
 import { getGridRow, getGridSpan } from '../../../utils/dateUtils';
 
 interface WeekViewProps {
-    date: Date; // Текущая дата календаря
-    events: CalendarEvent[];
+    date: Date; // РўРµРєСѓС‰Р°СЏ РґР°С‚Р° РєР°Р»РµРЅРґР°СЂСЏ
+    events: AppointmentResponse[];
+    onSelect?: (event: AppointmentResponse) => void;
 }
 
-export const WeekView = ({ date, events }: WeekViewProps) => {
-    // 1. Вычисляем дни недели для заголовка
-    // useMemo = Unity Awake/Start (кешируем результат, пока date не изменится)
+export const WeekView = ({ date, events, onSelect }: WeekViewProps) => {
+    // 1. Р’С‹С‡РёСЃР»СЏРµРј РґРЅРё РЅРµРґРµР»Рё РґР»СЏ Р·Р°РіРѕР»РѕРІРєР°
+    // useMemo = Unity Awake/Start (РєРµС€РёСЂСѓРµРј СЂРµР·СѓР»СЊС‚Р°С‚, РїРѕРєР° date РЅРµ РёР·РјРµРЅРёС‚СЃСЏ)
     const weekDays = useMemo(() => {
         const startOfWeek = new Date(date);
         const day = startOfWeek.getDay(); // 0 (Sun) - 6 (Sat)
 
-        // Смещаем дату на начало недели (Воскресенье)
-        // date.getDate() - day возвращает дату Воскресенья
+        // РЎРјРµС‰Р°РµРј РґР°С‚Сѓ РЅР° РЅР°С‡Р°Р»Рѕ РЅРµРґРµР»Рё (Р’РѕСЃРєСЂРµСЃРµРЅСЊРµ)
+        // date.getDate() - day РІРѕР·РІСЂР°С‰Р°РµС‚ РґР°С‚Сѓ Р’РѕСЃРєСЂРµСЃРµРЅСЊСЏ
         const diff = startOfWeek.getDate() - day;
         const sunday = new Date(startOfWeek.setDate(diff));
 
@@ -27,31 +28,32 @@ export const WeekView = ({ date, events }: WeekViewProps) => {
         });
     }, [date]);
 
-    // 2. Генерируем массив часов (0..23) для оси Y
+    // 2. Р“РµРЅРµСЂРёСЂСѓРµРј РјР°СЃСЃРёРІ С‡Р°СЃРѕРІ (0..23) РґР»СЏ РѕСЃРё Y
     const hours = Array.from({ length: 24 }, (_, i) => i);
 
-    // Функция для проверки "Сегодня" в хедере
+    // Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїСЂРѕРІРµСЂРєРё "РЎРµРіРѕРґРЅСЏ" РІ С…РµРґРµСЂРµ
     const isToday = (d: Date) => {
         const today = new Date();
         return d.getDate() === today.getDate() &&
             d.getMonth() === today.getMonth();
     };
 
-    // Определение колонки для события
-    // Колонка 1 = Время. Колонка 2 = Sun, 3 = Mon ... 8 = Sat
+    // РћРїСЂРµРґРµР»РµРЅРёРµ РєРѕР»РѕРЅРєРё РґР»СЏ СЃРѕР±С‹С‚РёСЏ
+    // РљРѕР»РѕРЅРєР° 1 = Р’СЂРµРјСЏ. РљРѕР»РѕРЅРєР° 2 = Sun, 3 = Mon ... 8 = Sat
     const getEventColumn = (evtDateStr: string): number => {
         const evtDate = new Date(evtDateStr);
         const startOfWeek = weekDays[0]; // Sun
         const endOfWeek = weekDays[6];   // Sat
 
-        // Проверяем, попадает ли событие в эту неделю (грубая проверка)
-        // В продакшене лучше сравнивать timestamp-ы
+        // РџСЂРѕРІРµСЂСЏРµРј, РїРѕРїР°РґР°РµС‚ Р»Рё СЃРѕР±С‹С‚РёРµ РІ СЌС‚Сѓ РЅРµРґРµР»СЋ (РіСЂСѓР±Р°СЏ РїСЂРѕРІРµСЂРєР°)
+        // Р’ РїСЂРѕРґР°РєС€РµРЅРµ Р»СѓС‡С€Рµ СЃСЂР°РІРЅРёРІР°С‚СЊ timestamp-С‹
         if (evtDate < startOfWeek || evtDate > new Date(endOfWeek.getTime() + 86400000)) {
             return -1;
         }
 
-        const dayIndex = evtDate.getDay(); // 0 (Sun) .. 6 (Sat)
-        return dayIndex + 2; // +2 потому что Grid Column start with 1, and 1st col is Time
+        // Р”РЅРё РЅРµРґРµР»Рё Р±РµСЂС‘Рј РїРѕ UTC вЂ” РјРѕРґРµР»СЊ СЃРµС‚РєРё UTC-РєРѕРЅСЃРёСЃС‚РµРЅС‚РЅР° (СЃРј. dateUtils.getGridRow).
+        const dayIndex = evtDate.getUTCDay(); // 0 (Sun) .. 6 (Sat)
+        return dayIndex + 2; // +2 РїРѕС‚РѕРјСѓ С‡С‚Рѕ Grid Column start with 1, and 1st col is Time
     };
 
     return (
@@ -72,11 +74,11 @@ export const WeekView = ({ date, events }: WeekViewProps) => {
             {/* --- BODY --- */}
             <div className={styles.body}>
 
-                {/* 1. Лейблы времени и Линии */}
+                {/* 1. Р›РµР№Р±Р»С‹ РІСЂРµРјРµРЅРё Рё Р›РёРЅРёРё */}
                 {hours.map(h => (
-                    // React Fragment (<>...</>) позволяет вернуть два элемента без родительского div
+                    // React Fragment (<>...</>) РїРѕР·РІРѕР»СЏРµС‚ РІРµСЂРЅСѓС‚СЊ РґРІР° СЌР»РµРјРµРЅС‚Р° Р±РµР· СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ div
                     <div key={`time-${h}`} style={{ display: 'contents' }}>
-                        {/* Лейбл (09:00) */}
+                        {/* Р›РµР№Р±Р» (09:00) */}
                         <div
                             className={styles.timeLabel}
                             style={{ gridRow: h * 4 + 1 }}
@@ -84,7 +86,7 @@ export const WeekView = ({ date, events }: WeekViewProps) => {
                             {h}:00
                         </div>
 
-                        {/* Линия на всю ширину */}
+                        {/* Р›РёРЅРёСЏ РЅР° РІСЃСЋ С€РёСЂРёРЅСѓ */}
                         <div
                             className={styles.hourLine}
                             style={{ gridRow: h * 4 + 1 }}
@@ -92,7 +94,7 @@ export const WeekView = ({ date, events }: WeekViewProps) => {
                     </div>
                 ))}
 
-                {/* 2. Вертикальные линии дней */}
+                {/* 2. Р’РµСЂС‚РёРєР°Р»СЊРЅС‹Рµ Р»РёРЅРёРё РґРЅРµР№ */}
                 {weekDays.map((_, i) => (
                     <div
                         key={`col-${i}`}
@@ -101,7 +103,7 @@ export const WeekView = ({ date, events }: WeekViewProps) => {
                     />
                 ))}
 
-                {/* 3. События */}
+                {/* 3. РЎРѕР±С‹С‚РёСЏ */}
                 {events.map(evt => {
                     const col = getEventColumn(evt.startTime);
                     if (col === -1) return null; // Skip events not in this week
@@ -115,9 +117,11 @@ export const WeekView = ({ date, events }: WeekViewProps) => {
                             className={styles.eventBlock}
                             style={{
                                 gridColumn: col,
-                                gridRow: `${rowStart} / span ${span}` // Grid Magic
+                                gridRow: `${rowStart} / span ${span}`, // Grid Magic
+                                cursor: onSelect ? 'pointer' : 'default',
                             }}
                             title={evt.title}
+                            onClick={onSelect ? e => { e.stopPropagation(); onSelect(evt); } : undefined}
                         >
                             <div style={{ fontWeight: 'bold' }}>{evt.title}</div>
                             <div>{evt.location}</div>

@@ -1,11 +1,11 @@
-// Парсинг TimeSpan "HH:MM:SS" в минуты
+// РџР°СЂСЃРёРЅРі TimeSpan "HH:MM:SS" РІ РјРёРЅСѓС‚С‹
 export const parseDuration = (duration: string): number => {
-    // Формат может быть "1.02:00:00" (дни.часы:минуты:секунды) или "02:00:00"
-    // Для упрощения считаем, что у нас "HH:MM:SS" или "HH:MM"
+    // Р¤РѕСЂРјР°С‚ РјРѕР¶РµС‚ Р±С‹С‚СЊ "1.02:00:00" (РґРЅРё.С‡Р°СЃС‹:РјРёРЅСѓС‚С‹:СЃРµРєСѓРЅРґС‹) РёР»Рё "02:00:00"
+    // Р”Р»СЏ СѓРїСЂРѕС‰РµРЅРёСЏ СЃС‡РёС‚Р°РµРј, С‡С‚Рѕ Сѓ РЅР°СЃ "HH:MM:SS" РёР»Рё "HH:MM"
     if (!duration) return 30; // Fallback
 
     const parts = duration.split(':');
-    if (parts.length < 2) return 60; // 1 час по дефолту
+    if (parts.length < 2) return 60; // 1 С‡Р°СЃ РїРѕ РґРµС„РѕР»С‚Сѓ
 
     const hours = parseInt(parts[0]);
     const minutes = parseInt(parts[1]);
@@ -13,21 +13,25 @@ export const parseDuration = (duration: string): number => {
     return (hours * 60) + minutes;
 };
 
-// Получение слота сетки (для 15-минутного шага)
+// РџРѕР»СѓС‡РµРЅРёРµ СЃР»РѕС‚Р° СЃРµС‚РєРё (РґР»СЏ 15-РјРёРЅСѓС‚РЅРѕРіРѕ С€Р°РіР°)
 // 00:00 -> 1
 // 01:00 -> 5
+//
+// РЎРµСЂРІРµСЂ С…СЂР°РЅРёС‚ startTime РєР°Рє UTC (ISO СЃ Z). РЎРµС‚РєР° WeekView РѕС‚РѕР±СЂР°Р¶Р°РµС‚ СЃРѕР±С‹С‚РёСЏ
+// В«РєР°Рє РµСЃС‚СЊВ» РІ UTC (С„РѕСЂРјР° СЃРѕР·РґР°РЅРёСЏ РїРѕРґРїРёСЃР°РЅР° В«Time (UTC)В»), РїРѕСЌС‚РѕРјСѓ РёСЃРїРѕР»СЊР·СѓРµРј
+// UTC-РєРѕРјРїРѕРЅРµРЅС‚С‹ РґР°С‚С‹, Р° РЅРµ Р»РѕРєР°Р»СЊРЅС‹Р№ С‡Р°СЃРѕРІРѕР№ РїРѕСЏСЃ вЂ” РёРЅР°С‡Рµ СЃРѕР±С‹С‚РёСЏ СЃСЉРµР·Р¶Р°СЋС‚.
 export const getGridRow = (dateString: string): number => {
     const date = new Date(dateString);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
 
-    // (Часы * 60 + Минуты) / 15 минут + 1 (так как grid lines начинаются с 1)
+    // (Р§Р°СЃС‹ * 60 + РњРёРЅСѓС‚С‹) / 15 РјРёРЅСѓС‚ + 1 (С‚Р°Рє РєР°Рє grid lines РЅР°С‡РёРЅР°СЋС‚СЃСЏ СЃ 1)
     const slot = Math.floor((hours * 60 + minutes) / 15) + 1;
     return slot;
 };
 
 export const getGridSpan = (durationStr: string): number => {
     const minutes = parseDuration(durationStr);
-    // Сколько 15-минутных слотов занимает событие
+    // РЎРєРѕР»СЊРєРѕ 15-РјРёРЅСѓС‚РЅС‹С… СЃР»РѕС‚РѕРІ Р·Р°РЅРёРјР°РµС‚ СЃРѕР±С‹С‚РёРµ
     return Math.ceil(minutes / 15);
 };

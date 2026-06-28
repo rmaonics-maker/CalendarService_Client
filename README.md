@@ -1,73 +1,186 @@
-# React + TypeScript + Vite
+#  Calendar Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Это веб-клиент для **Enterprise System**.
+Показывает календарь со встречами, умеет бронировать переговорки и смотреть историю
+активности. Внутри — React 19, TypeScript и Vite.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+##  Что это вообще делает?
 
-## React Compiler
+Три вкладки, как у взрослых:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Вкладка | Что делает | Мой уровень гордости |
+|---------|-----------|----------------------|
+| **Calendar**  | Встречи, повторяющиеся события (да, я сам парсю `RRULE`, не плачьте) |  Горд |
+| **Bookings**  | Бронирование переговорок (3 штуки, захардкожено, не бейте) |  Горд |
+| **History**  | История твоих действий + баланс (откуда тут баланс — не спрашивайте) |  Ну такое |
 
-## Expanding the ESLint configuration
+А ещё — **логин/регистрация** через JWT, потому что без авторизации сейчас никуда,
+даже посмотреть на собственный календарь нельзя.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+##  Возможности (которые я нечаянно сделал рабочими)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+-  **Авторизация по JWT** — логин, регистрация, авто-обновление токена на 401
+  (один «летящий» refresh, чтобы параллельные запросы не устрояли драку).
+-  **Календарь** — создание/редактирование/удаление встреч, недельный и дневной
+  виды, бесконечный скролл, повторяющиеся события (`RRULE`).
+-  **Бронирование комнат** — модалки, валидация, 409 Conflict, если комнату
+  уже заняли (не я придумал — сервер ругается).
+-  **История** — что и когда ты натворил, с виртуальным списком.
+-  **Тосты** — всплывающие уведомления, написанные своими руками
+  (без библиотек, я же учусь!).
+-  **Error Boundary** — чтобы одна ошибка не роняла всё приложение.
+-  (другие) **Виртуальный список** — `VirtualList.tsx`, рендерит только видимые
+  строки.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## Технологии
+
+- **React 19** — самый свежий.
+- **TypeScript ~5.9** — чтобы компилятор ругался вместо пользователей.
+- **Vite** (`rolldown-vite`) — сборка, дев-сервер, и главное — **прокси**
+  на три разных микросервиса бэкенда.
+- **CSS Modules** — стили без конфликтов.
+- **OAuth2 Resource Owner Password** (dev-режим) — токены через `/connect/token`.
+
+---
+
+##  Как запустить
+
+### 1. Поставь зависимости
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Если `npm` ругается на `rolldown-vite` — это нормально, он особенный.
+Просто подожди, кофе тут не поможет, только терпение.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 2. Подними бэкенд
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Этот клиент **сам по себе бесполезен** — ему нужен сервер. Бэкенд состоит из трёх
+микросервисов (поднимаются, скорее всего, через Docker Compose в соседней папке):
+
+| Сервис | Порт | Зачем |
+|--------|------|-------|
+| **Auth API** | `http://localhost:8081` | `/connect/token`, `/Account/Register` |
+| **Calendar API** | `http://localhost:8080` | `/api/v1/events`, `/health` |
+| **Booking API** | `http://localhost:8082` | `/api/bookings` |
+
+> Если серверы не запущены — клиент откроется, но будет грустно показывать
+> ошибки. Это не баг, это отсутствие бэкенда. 
+
+### 3. Запусти дев-сервер
+
+```bash
+npm run dev
 ```
+
+Откроется что-то вроде `http://localhost:5173`.
+
+### 4. Войди
+
+Dev-аккаунт уже подставлен в форму входа (да, я знаю, что так нельзя в проде,
+но это dev, не кричите):
+
+```
+ admin@calendar.com
+ Password123!
+```
+
+---
+
+##  Как тут всё устроено (карта для заблудившихся)
+
+```
+src/
+├── api/              #   Слой общения с сервером
+│   ├── httpClient.ts #   Низкоуровневый fetch + токен + refresh
+│   ├── authApi.ts    #   Логин/регистрация/refresh токена
+│   ├── events.tsx    #   Календарь: встречи
+│   ├── bookings.tsx  #   Бронирование комнат
+│   └── usersApi.ts   #   История и профиль пользователя
+├── auth/             #   JWT, контекст, экран логина
+├── components/common/#   Тосты, Error Boundary, виртуальный список
+├── features/         #   Самое интересное (по фичам, как учили)
+│   ├── calendar/     #   Календарь, виды, модалки
+│   ├── bookings/     #   Бронирование комнат
+│   └── history/      #   История активности
+├── hooks/            #   useAsync и прочие кастомные
+├── utils/            #   dateUtils, rrule, errors, eventId
+└── types/            #   TypeScript-типы под ответы сервера
+```
+
+Архитектура «по фичам», потому что я посмотрел одно видео и теперь считаю
+себя архитектором. 
+
+---
+
+##  Про прокси (важно, если что-то не работает)
+
+Запросы идут на **относительные пути**, а Vite-прокси (`vite.config.ts`)
+раскидывает их по нужным сервисам. Порядок правил имеет значение!
+
+>  `/api/bookings` идёт **ДО** `/api/v1`, иначе Vite по ошибке отправит
+> бронирования в Календарь, и все будут плакать.
+
+См. комментарии в `vite.config.ts` — я сам себе там всё объяснил, чтобы
+не забыть. Будущему мне привет. 
+
+---
+
+##  Скрипты
+
+```bash
+npm run dev       #  Запустить дев-сервер
+npm run build     #  Собрать прод (tsc -b && vite build)
+npm run lint      #  Прогнать ESLint (он найдёт, поверь)
+npm run preview   #  Посмотреть собранную версию локально
+```
+
+---
+
+##  Известные странности (они не баги, они фичи)
+
+-  **Список комнат захардкожен** (`features/bookings/rooms.ts`). Сервер не отдаёт
+  список комнат через API, поэтому я вписал их руками. Если на сервере появится
+  `/api/rooms` — заменю на реальную загрузку. Когда-нибудь.
+-  **Dev-клиент OAuth2** (`loadtest_client` / `loadtest-secret`). В проде нужен
+  Authorization Code + PKCE, но я до этого ещё не дошёл.
+-  **RRULE парсер самописный**. Да, есть библиотеки. Нет, я хотел пощупать руками.
+  Может ошибаться на экзотических правилах — тыкайте палкой аккуратно.
+-  **Часть стилей прямо в JSX**, а не в CSS Modules. Учусь, исправляюсь.
+
+---
+
+##  TODO (планы, которые я точно не заброшу... наверное)
+
+- [ ] Реальная загрузка списка комнат с сервера
+- [ ] Authorization Code + PKCE для прод-окружения
+- [ ] Перетащить инлайн-стили в CSS Modules
+- [ ] Тесты (ха-ха, конечно... но в списке пусть будет)
+- [ ] Тёмная/светлая тема (сейчас только тёмная, как моя душа)
+
+---
+
+##  На чём я учился
+
+Огромное спасибо: документации React, рандомным ответам на StackOverflow,
+тому одному guy на YouTube и синему киту Docker, который каждый раз ругается,
+но всё-таки работает.
+
+---
+
+##  Лицензия
+
+Делайте что хотите, только не показывайте это на собеседовании
+без объяснений. 
+
+---
+
+> P.S. Если что-то сломалось — это не баг, это **особенность процесса обучения**.
+> PR'ы и issue приветствуются, ревью — без жесткости, я и так переживаю. 
